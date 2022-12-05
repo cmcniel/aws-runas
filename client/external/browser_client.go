@@ -15,7 +15,9 @@ package external
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"runtime"
 
@@ -33,6 +35,15 @@ const (
 
 type browserClient struct {
 	*baseClient
+}
+
+type browserLocalState struct {
+	Profile browserProfile `json:profile`
+}
+
+type browserProfile struct {
+	Last_Active_Profiles []string `json:last_active_profiles`
+	Last_Used            string   `json:last_used`
 }
 
 // NewbrowserClient provides a Saml and Web client suitable for testing code outside of this package.
@@ -56,6 +67,7 @@ func (c *browserClient) Authenticate() error {
 
 // AuthenticateWithContext uses Chromedp to open a browser for the authentication process.
 func (c *browserClient) AuthenticateWithContext(context.Context) error {
+	var localState browserLocalState
 	c.Logger.Debugf("Starting a browser to authenticate..")
 	dir, err := homedir.Dir()
 	if err != nil {
@@ -63,14 +75,23 @@ func (c *browserClient) AuthenticateWithContext(context.Context) error {
 	}
 	switch runtime.GOOS {
 	case `windows`:
-		dir += `/AppData/Local/Google/Chrome/User Data/Default`
+		dir += `/AppData/Local/Google/Chrome/User Data`
 	case `darwin`:
-		dir += `/Library/Application Support/Google/Chrome/Default`
+		dir += `/Library/Application Support/Google/Chrome`
 	case `linux`:
-		dir += `/.config/google-chrome/default`
+		dir += `/.config/google-chrome`
 	default:
-		dir += `/.config/google-chrome/default`
+		dir += `/.config/google-chrome`
 	}
+	ls, err := ioutil.ReadFile(dir + `/Local State`)
+	if err != nil {
+		c.Logger.Debugf("Local state Read Err %s\n", err)
+	}
+	err = json.Unmarshal(ls, &localState)
+	if err != nil {
+		c.Logger.Debugf("unmashal err %s\n", err)
+	}
+
 	// Remove the default option for headless
 	opts := chromedp.DefaultExecAllocatorOptions[0:1]
 	var browserExec string
@@ -97,10 +118,12 @@ func (c *browserClient) AuthenticateWithContext(context.Context) error {
 		c.Logger.Infof("browser %s not supported using chrome if available.", c.AuthBrowser)
 	}
 
+	c.Logger.Debugf("using browser profile [ %s ]\n", localState.Profile.Last_Used)
+
 	opts = append(opts,
 		chromedp.UserDataDir(dir),
 		chromedp.Flag(`shared-files`, true),
-		chromedp.Flag(`profile-directory`, `Default`),
+		chromedp.Flag(`profile-directory`, localState.Profile.Last_Used),
 		chromedp.WindowSize(400, 700),
 		chromedp.NoDefaultBrowserCheck,
 	)
