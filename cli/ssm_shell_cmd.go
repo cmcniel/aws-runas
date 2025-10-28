@@ -14,11 +14,12 @@
 package cli
 
 import (
+	"os/signal"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/mmmorris1975/ssm-session-client/ssmclient"
 	"github.com/urfave/cli/v2"
-	"os/signal"
 )
 
 const ssmShellDesc = `Create an SSM shell session with the specified 'target_spec' using configuration from the
@@ -56,9 +57,10 @@ var ssmShellCmd = &cli.Command{
 			}()
 
 			in := &ssm.StartSessionInput{Target: aws.String(ec2Id)}
+			// execute the SSM session plugin from AWS
 			return execSsmPlugin(c.ConfigProvider(), in)
 		}
-
+		// use built-in SSM session client
 		return ssmclient.ShellPluginSession(c.ConfigProvider(), ec2Id)
 	},
 }

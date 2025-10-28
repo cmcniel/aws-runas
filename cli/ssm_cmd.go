@@ -16,14 +16,16 @@ package cli
 import (
 	"context"
 	"encoding/json"
+	"os"
+	"os/exec"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/urfave/cli/v2"
+
 	"github.com/mmmorris1975/aws-runas/client"
 	"github.com/mmmorris1975/aws-runas/credentials"
-	"github.com/urfave/cli/v2"
-	"os"
-	"os/exec"
 )
 
 var ssmCmd = &cli.Command{

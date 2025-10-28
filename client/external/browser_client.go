@@ -133,7 +133,7 @@ func (c *browserClient) targetListener(ev interface{}) {
 	case *network.EventRequestWillBeSent:
 		if ev.Request.URL == `https://signin.aws.amazon.com/saml` {
 			// parse and unescape the query string for the key value pair that contains SAMLResponse=xxxx
-			qs, err := url.ParseQuery(ev.Request.PostData)
+			qs, err := url.ParseQuery(ev.Request.PostDataEntries[0].Bytes)
 			if err != nil {
 				c.Logger.Errorf("Error parsing SAMLResponse: %v", err)
 				return

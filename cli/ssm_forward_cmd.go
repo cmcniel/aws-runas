@@ -14,12 +14,11 @@
 package cli
 
 import (
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ssm"
-	"github.com/mmmorris1975/ssm-session-client/ssmclient"
-	"github.com/urfave/cli/v2"
 	"strconv"
 	"strings"
+
+	"github.com/mmmorris1975/ssm-session-client/ssmclient"
+	"github.com/urfave/cli/v2"
 )
 
 const ssmFwdDesc = `Create an SSM port forwarding session with the specified 'target_spec' using configuration
@@ -52,27 +51,28 @@ var ssmForwardCmd = &cli.Command{
 		parts := strings.Split(target, `:`)
 		target = strings.Join(parts[:len(parts)-1], `:`)
 		rp := parts[len(parts)-1]
-		lp := strconv.Itoa(ctx.Int(ssmFwdPortFlag.Name))
+		//lp := strconv.Itoa(ctx.Int(ssmFwdPortFlag.Name))
 
 		ec2Id, err := ssmclient.ResolveTarget(target, c.ConfigProvider())
 		if err != nil {
 			return err
 		}
 
-		if ctx.Bool(ssmUsePluginFlag.Name) {
-			params := map[string][]string{
-				"localPortNumber": {lp},
-				"portNumber":      {rp},
-			}
+		/*
+			if ctx.Bool(ssmUsePluginFlag.Name) {
+				params := map[string][]string{
+					"localPortNumber": {lp},
+					"portNumber":      {rp},
+				}
 
-			in := &ssm.StartSessionInput{
-				DocumentName: aws.String("AWS-StartPortForwardingSession"),
-				Parameters:   params,
-				Target:       aws.String(ec2Id),
+				in := &ssm.StartSessionInput{
+					DocumentName: aws.String("AWS-StartPortForwardingSession"),
+					Parameters:   params,
+					Target:       aws.String(ec2Id),
+				}
+				return execSsmPlugin(c.ConfigProvider(), in)
 			}
-			return execSsmPlugin(c.ConfigProvider(), in)
-		}
-
+		*/
 		rpi, _ := strconv.Atoi(rp)
 		in := &ssmclient.PortForwardingInput{
 			Target:     ec2Id,

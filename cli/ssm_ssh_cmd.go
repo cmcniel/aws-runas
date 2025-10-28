@@ -15,6 +15,11 @@ package cli
 
 import (
 	"errors"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2instanceconnect"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
@@ -22,10 +27,6 @@ import (
 	"github.com/mmmorris1975/ssm-session-client/ssmclient"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/crypto/ssh"
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
 )
 
 const ssmSshDesc = `Create an SSH over SSM session with the specified 'target_spec' using configuration from
