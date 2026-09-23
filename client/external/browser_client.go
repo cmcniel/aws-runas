@@ -304,7 +304,7 @@ func waitForProcessExit(pid int, max time.Duration) {
 func (c *browserClient) targetListener(ev any, once *sync.Once) {
 	switch ev := ev.(type) { //nolint:gocritic
 	case *network.EventRequestWillBeSent:
-		if ev.Request.URL == `https://signin.aws.amazon.com/saml` {
+		if ev.Request.URL == `https://signin.aws.amazon.com/saml` || ev.Request.URL == `https://signin.amazonaws-us-gov.com/saml` {
 			for i, entry := range ev.Request.PostDataEntries {
 				decoded, _ := base64.StdEncoding.DecodeString(entry.Bytes)
 				c.Logger.Debugf("%d - %s\n", i, string(decoded))
